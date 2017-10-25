@@ -1,0 +1,65 @@
+USO DEL MAKEFILE:
+
+    "make cond" compila ed esegue con il controllo della postondizione
+    "make nocond" compila ed esegue senzail controllo della postcondizione
+   
+------------------------- 
+ 
+    Il programma deve generare due processi pA e pB.
+    Il processo pA "Produttore" dovrà aggiornare la variabile condivisa int buffer a buffer+1
+    Il processo pB "Consumatore" dovrà aggiornare la variabile condivisa int buffer a buffer-1
+    
+    
+    Il risultato atteso dovrà essere:
+    
+    Eseguo A
+    Contatore: 1
+    
+    Eseguo B
+    Contatore: 0
+    
+    etc..
+    
+    
+    Il problema è che senza controllo sulla postcondizione (ovvero il valore di flag == true)
+    se il processo B dovesse essere eseguito per primo, avremo un risultato del tipo:
+    
+    Eseguo B
+    Contatore: -1
+    
+    Eseguo B
+    Contatore: -2
+    
+    Eseguo B
+    Contatore: -3
+    
+    ....
+    
+    Eseguo B
+    Contatore: -n
+    
+    Eseguo A
+    Contatore: -n + 1
+    
+    Eseguo A
+    Contatore: -n + 2
+    
+    .....
+    
+    Eseguo A
+    Contatore: 1
+    
+    Eseguo B
+    Contatore: 0
+    
+    Eseguo A
+    Contatore: 1
+    
+    Eseguo B
+    Contatore: 0
+        
+    etc..
+    
+    
+    Come mai? C'è mutua esclusione ed attesa limitata, ma la legge del progresso non viene rispettata.
+
