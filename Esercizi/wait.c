@@ -8,22 +8,30 @@
 #include <sys/ipc.h>
 
 const int BUFSIZE = 10;
-const char BUFA[] = "Nonflushing ayylmaoo. Process A\n";
+const char BUFA[] = "Nonflushing ayylmaoo. Process A\n"; //Essendo costante, il buffer non subisce flush.
 const char BUFB[] = "Nonflushing ayyylmaoo. Process B.\n";
-const int IDA = 0;
-const int IDB = 1;
+const int IDA = 0; //Identificativo processo A "Producer"
+const int IDB = 1; //Identificativo processo B "Consumer"
 
 static int pnew(void);
+static int* shmake(void);
 void producer(int*[],int*,int*);
 void consumer(int*[],int*,int*);
 
 int main (int argc, char* argv[])
 {
     pid_t pA,pB;
-    int segment_id = shmget (IPC_PRIVATE,512,S_IRUSR|S_IWUSR);
-    int* shm_pointer = (int*) shmat(segment_id,NULL,0);
-    for (int i = 0; i<10; i++) shm_pointer[i] = 0;
-    int* ready[2] ={&(shm_pointer[0]),&(shm_pointer[1])};
+    int* shm_pointer = shmake(); //Alloca ed inizializza una porzione di memoria condivisa a 0int
+    int* ready[2] ={&(shm_pointer[0]),&(shm_pointer[1])}; /*
+    														Per registrare il turno e lo  stato REDY\NOT READY  dei processi
+    													  	porziono la memoria in più settori logici, dove:
+    													  	 |TURN: Logica booleana di permesso d'entrata in sez. critica.
+    													  	 |READY[2]: Richiesta d'entrata nella sezione critica, dove
+    													  	 		READY[IDA] = TRUE significa che il processo A
+    													  	 					vuole entrare in sezione critica.
+    													  	 |BUFFER: Contatore
+    													  	 
+    													  	*/
     int* turn = &(shm_pointer[2]);
     int* buffer = &(shm_pointer[3]);
     if ((pA = pnew()) == 0) producer (ready,turn,buffer);
@@ -41,6 +49,14 @@ int main (int argc, char* argv[])
         }
     
     }
+}
+
+static int* shmake(void)
+{
+    int segment_id = shmget (IPC_PRIVATE,512,S_IRUSR|S_IWUSR);
+    int* shm_pointer = (int*) shmat(segment_id,NULL,0);
+    for (int i = 0; i<10; i++) shm_pointer[i] = 0;	
+	return shm_pointer;
 }
 
 static int pnew(void)
