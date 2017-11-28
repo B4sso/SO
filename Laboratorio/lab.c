@@ -34,7 +34,7 @@ if (a == 0)
 			i++;
 		}
 		exit(0);
-	}
+	} else
 if (b == 0)
 	{
 		int i;
